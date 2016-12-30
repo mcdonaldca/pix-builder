@@ -33,6 +33,22 @@ html, body {
     position: absolute;
     top: 50%;
     transform: translateY(-50%); }
+  .toolbar .actions__button {
+    background-color: #dfe2ef;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    margin: 0 4px;
+    position: relative;
+    width: 24px; }
+    .toolbar .actions__button img {
+      height: 16px;
+      width: 16px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); }
 
 .toolbox {
   position: absolute;
@@ -48,6 +64,28 @@ html, body {
     border-bottom-left-radius: 4px;
     display: inline-block;
     padding: 8px; }
+  .toolbox .actions__button {
+    background-color: #dfe2ef;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    margin: 0 4px;
+    position: relative;
+    width: 24px;
+    display: block;
+    margin-bottom: 8px; }
+    .toolbox .actions__button img {
+      height: 16px;
+      width: 16px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); }
+    .toolbox .actions__button.currentMode {
+      border: 1px solid #4f515b; }
+    .toolbox .actions__button:last-of-type {
+      margin-bottom: 0; }
   .toolbox .toolbox__panel {
     background-color: #acb0c5;
     border-bottom-left-radius: 4px;
@@ -93,23 +131,6 @@ html, body {
       transform: translate(-50%, -50%); }
     .toolbox .selection__option.selected {
       border: 1px solid #dfe2ef; }
-
-.actions__button {
-  background-color: #dfe2ef;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-block;
-  height: 24px;
-  margin: 0 4px;
-  position: relative;
-  width: 24px; }
-  .actions__button img {
-    height: 16px;
-    width: 16px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); }
 
 .container {
   background: #f3f4f7;

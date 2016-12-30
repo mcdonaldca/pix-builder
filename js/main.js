@@ -36,14 +36,18 @@ function Builder() {
     var type = $(e.delegateTarget).attr('data-type');
     builder.toolboxActionButtonClick(type);
   });
-  $('.panel__flooring .selection__option').click(function(e) {
-    builder.flooringSelection(e);
-  });
+  $('.panel__flooring .selection__option').click(function(e) { builder.flooringSelection(e); });
+  $('.panel__walls .selection__option').click(function(e) { builder.wallsSelection(e); });
 
   this.mouseDown = false;
   this.openPanel = undefined;
-  this.mode = 'flooring';
   this.selection = 'img/flooring/wood-light.png';
+
+  this.Modes = {
+    FLOORING: 'flooring',
+    WALLS: 'walls',
+  }
+  this.mode = this.Modes.FLOORING;
 }
 
 
@@ -83,12 +87,11 @@ Builder.prototype.buildCells = function() {
 
 Builder.prototype.cellAction = function(x, y) {
   switch(this.mode) {
-    case 'flooring':
-      if (this.selection != 'hammer') {
-        this.fillCell(x, y);
-      } else {
-        this.clearCell(x, y);
-      }
+    case this.Modes.FLOORING:
+      if (this.selection != 'hammer') this.fillCell(x, y);
+      else this.clearCell(x, y);
+      break;
+
     default:
       break;
   }
@@ -177,9 +180,35 @@ Builder.prototype.toolboxActionButtonClick = function(type) {
 
 
 
+Builder.prototype.modeChange = function(type) {
+  if (this.mode != type) {
+    this.mode = type;
+    $('.toolbox .currentMode').removeClass('currentMode');
+    $('.toolbox [data-type="' + type + '"]').addClass('currentMode');
+  }
+}
+
+
+
 Builder.prototype.flooringSelection = function(e) {
-  this.mode = 'flooring';
-  $('.panel__flooring .selected').removeClass('selected');
+  this.modeChange(this.Modes.FLOORING);
+  $('.panel .selected').removeClass('selected');
+
+  if ($(e.delegateTarget).hasClass('hammer')) {
+    this.selection = 'hammer';
+  } else {
+    var img = e.delegateTarget.firstElementChild;
+    this.selection = $(img).attr('src');
+  }
+
+  $(e.delegateTarget).addClass('selected');
+};
+
+
+
+Builder.prototype.wallsSelection = function(e) {
+  this.modeChange(this.Modes.WALLS);
+  $('.panel .selected').removeClass('selected');
 
   if ($(e.delegateTarget).hasClass('hammer')) {
     this.selection = 'hammer';
