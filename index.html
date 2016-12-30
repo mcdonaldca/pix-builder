@@ -9,16 +9,52 @@
   <div class="header bar"><div class="header__title">pix world builder</div></div>
   <div class="toolbar bar">
     <div class="toolbar__actions">
-      <div class="actions__button" data-type="toggle-grid">X</div>
-      <div class="actions__button" data-type="clear-all">X</div>
+      <div class="actions__button" data-type="toggle-grid"><img src="img/icons/toggle-grid.png" /></div>
+      <div class="actions__button" data-type="clear-all"><img src="img/icons/clear-all.png" /></div>
+      <div class="actions__button" data-type="resize"><img src="img/icons/resize.png" /></div>
+    </div>
+    <div class="toolbar__panels">
+      <div class="panels__panel resize">
+        hello I am testing a thing and I have content
+      </div>
     </div>
   </div>
-  <div class="canvas gridded">
-    <div class="cells"></div>
-  </div>
-  <div class="toolbox">
-    <div class="toolbox__actions">
-      <div class="actions__button" data-type="flooring"><img src="img/flooring.png"></div>
+  <div class="container">
+    <div class="canvas gridded">
+      <div class="cells"></div>
+    </div>
+    <div class="toolbox">
+      <div class="toolbox__actions">
+        <div class="actions__button" data-type="flooring"><img src="img/icons/flooring.png"></div>
+      </div>
+      <div class="toolbox__panel">
+        <div class="panel__flooring panel">
+          <div class="panel__title">Flooring</div>
+          <div class="panel__selection">
+            <div class="selection__option hammer">
+              <img src="img/icons/hammer.png">
+            </div>
+            <div class="selection__option selected">
+              <img src="img/flooring/wood-light.png">
+            </div>
+            <div class="selection__option">
+              <img src="img/flooring/wood-med.png">
+            </div>
+            <div class="selection__option">
+              <img src="img/flooring/carpet-blue.png">
+            </div>
+            <div class="selection__option">
+              <img src="img/flooring/carpet-blue-green.png">
+            </div>
+            <div class="selection__option">
+              <img src="img/flooring/carpet-tan.png">
+            </div>
+            <div class="selection__option">
+              <img src="img/flooring/concrete.png">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <script src="js/third-party/jquery-1.12.0.min.js"></script>

@@ -29,12 +29,21 @@ function Builder() {
     builder.cellMouseEnter(x, y);
   });
   $('.actions__button').click(function(e) {
-    var type = $(e.target).attr('data-type');
+    var type = $(e.delegateTarget).attr('data-type');
     builder.actionButtonClick(type);
+  });
+  $('.toolbox .actions__button').click(function(e) {
+    var type = $(e.delegateTarget).attr('data-type');
+    builder.toolboxActionButtonClick(type);
+  });
+  $('.panel__flooring .selection__option').click(function(e) {
+    builder.flooringSelection(e);
   });
 
   this.mouseDown = false;
-  this.selectedImage = 'img/flooring/wood-light.png';
+  this.openPanel = undefined;
+  this.mode = 'flooring';
+  this.selection = 'img/flooring/wood-light.png';
 }
 
 
@@ -72,6 +81,22 @@ Builder.prototype.buildCells = function() {
 
 
 
+Builder.prototype.cellAction = function(x, y) {
+  switch(this.mode) {
+    case 'flooring':
+      if (this.selection != 'hammer') {
+        this.fillCell(x, y);
+      } else {
+        this.clearCell(x, y);
+      }
+    default:
+      break;
+  }
+};
+
+
+
+
 Builder.prototype.fillCell = function(x, y) {
   // Create a new image, set its onload function, and set the source
   var image = new Image();
@@ -79,7 +104,14 @@ Builder.prototype.fillCell = function(x, y) {
   image.onload = function() {
     pool.drawImageOnLoad(this, x, y);
   }
-  image.src = this.selectedImage;
+  image.src = this.selection;
+};
+
+
+
+
+Builder.prototype.clearCell = function(x, y) {
+  this.displayContext.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
 };
 
 
@@ -87,7 +119,7 @@ Builder.prototype.fillCell = function(x, y) {
 
 Builder.prototype.cellMouseDown = function(x, y) {
   this.mouseDown = true;
-  this.fillCell(x, y);
+  this.cellAction(x, y);
 };
 
 
@@ -101,7 +133,7 @@ Builder.prototype.cellMouseUp = function(x, y) {
 
 
 Builder.prototype.cellMouseEnter = function(x, y) {
-  if (this.mouseDown) this.fillCell(x, y);
+  if (this.mouseDown) this.cellAction(x, y);
 };
 
 
@@ -114,13 +146,49 @@ Builder.prototype.actionButtonClick = function(type) {
       break;
 
     case 'clear-all':
-      var shouldClear = confirm('Do you want to erase your world?');
+      var shouldClear = confirm('Do you want to clear the canvas?');
       if (shouldClear) this.displayContext.clearRect(0, 0, this.displayCanvas.width, this.displayCanvas.height);
+      break;
+
+    case 'resize':
+      console.log('resize');
       break;
 
     default:
       break;
   }
+};
+
+
+Builder.prototype.toolboxActionButtonClick = function(type) {
+  if (this.openPanel == type) {
+    $('.toolbox').removeClass('expanded');
+    this.openPanel = undefined;
+  } else if (!this.openPanel) {
+    $('.toolbox').addClass('expanded');
+    this.openPanel = type;
+  } else {
+    this.openPanel = type;
+  }
+
+  $('.panel.open').removeClass('open');
+  $('.panel__' + type).addClass('open');
+}
+
+
+
+Builder.prototype.flooringSelection = function(e) {
+  this.mode = 'flooring';
+  $('.panel__flooring .selected').removeClass('selected');
+
+  if ($(e.delegateTarget).hasClass('hammer')) {
+    this.selection = 'hammer';
+  } else {
+    var img = e.delegateTarget.firstElementChild;
+    this.selection = $(img).attr('src');
+  }
+
+  $(e.delegateTarget).addClass('selected');
 };
 
 

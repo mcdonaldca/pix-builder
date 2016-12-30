@@ -17,62 +17,168 @@ $grey-50:  #f3f4f7;
   transform: translateY(-50%);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  background: $grey-50;
-}
-
-.bar {
-  height: 24px;
-  padding: 8px;
-}
-
-.header {
-  background-color: $grey-700;
-  color: #e06868;
-  font: 20px "Roboto Slab";
-  position: relative;
-
-  .header__title { @include center-vertical; }
-}
-
-.toolbar {
-  background-color: $grey-500;
-  margin-bottom: 32px;
-  position: relative;
-
-  .toolbar__actions { @include center-vertical; }
-}
-
-.toolbox {
-  background-color: $grey-300;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  right: 0;
-  padding: 8px;
-  position: absolute;
-}
-
-.actions__button {
+@mixin icono-option() {
   background-color: $grey-100;
   border-radius: 4px;
+  cursor: pointer;
   display: inline-block;
   height: 24px;
   margin: 0 4px;
   position: relative;
   width: 24px;
 
-  img { @include center; }
+  img { 
+    height: 16px;
+    width: 16px;
+    @include center; 
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+
+
+
+
+.bar {
+  height: 40px;
+  width: 100%;
+}
+
+.header {
+  background-color: $grey-700;
+  color: #e06868;
+  font: 20px "Roboto Slab";
+  padding: 8px;
+  position: relative;
+
+  .header__title { @include center-vertical; }
+}
+
+.toolbar {
+  position: relative;
+  top: 2px;
+
+  .toolbar__actions { 
+    background-color: $grey-500;
+    padding: 8px;
+    width: 100%;
+    z-index: 1;
+    @include center-vertical; 
+  }
+
+  .toolbar__panels {
+
+  }
+}
+
+
+
+
+
+
+
+
+.toolbox {
+  position: absolute;
+  right: -204px;
+  top: 32px;
+  width: 252px;
+  transition: all .35s ease-in-out;
+
+  &.expanded {
+    right: 0;
+  }
+
+  .toolbox__actions {
+    background-color: $grey-300;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    display: inline-block;
+    padding: 8px;
+  }
+
+  .toolbox__panel {
+    background-color: $grey-300;
+    border-bottom-left-radius: 4px;
+    display: inline-block;
+    height: 500px;
+    position: absolute;
+    width: 204px;
+  }
+
+  .panel {
+    display: none;
+    height: 100%;
+    width: 100%;
+
+    &.open { display: block; }
+  }
+
+  .panel__title {
+    font: 14px "Roboto Slab";
+    font-weight: bold;
+    height: 44px;
+    padding: 12px 0;
+    text-align: center;
+    width: 100%;
+  }
+
+  .panel__selection {
+    background-color: $grey-700;
+    border-radius: 4px;
+    height: calc(100% - 60px);
+    margin: 0 16px 16px 16px;
+    padding: 16px;
+  }
+
+  .selection__option {
+    @include icono-option;
+    background-color: transparent;
+
+    &.selected {
+      border: 1px solid $grey-100;
+    }
+  }
+}
+
+.actions__button {
+  @include icono-option;
+}
+
+
+
+
+
+
+
+
+.container {
+  background: $grey-50;
+  height: calc(100% - 80px);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
 }
 
 .canvas {
   background-color: white;
-  width: 672px;
   height: 480px;
+  max-height: 100%;
+  max-width: 100%;
+  width: 672px;
   @include center;
 
   &.gridded .cells .cell {
@@ -87,10 +193,11 @@ html {
   }
 
   .cells {
+    cursor: pointer;
+    left: 0;
     line-height: 0;
     position: absolute;
     top: 0;
-    left: 0;
     z-index: 1;
   }
 
@@ -98,6 +205,5 @@ html {
     width: 48px;
     height: 48px;
     display: inline-block;
-    box-sizing: border-box;
   }
 }
