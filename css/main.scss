@@ -1,0 +1,45 @@
+$grey: #4f515b;
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: $grey;
+  color: #e06868;
+  font: 20px "Roboto Slab";
+  margin-bottom: 32px;
+  padding: 8px;
+}
+
+.canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  canvas {
+    position: relative;
+    z-index: 0;
+  }
+
+  .cells {
+    line-height: 0;
+    border: 1px solid $grey;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 672px;
+    height: 480px;
+  }
+
+  .cell {
+    width: 48px;
+    height: 48px;
+    border: 1px dashed $grey;
+    display: inline-block;
+    box-sizing: border-box;
+  }
+}

@@ -1,0 +1,36 @@
+* {
+  margin: 0;
+  padding: 0; }
+
+header {
+  background-color: #4f515b;
+  color: #e06868;
+  font: 20px "Roboto Slab";
+  margin-bottom: 32px;
+  padding: 8px; }
+
+.canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); }
+  .canvas canvas {
+    position: relative;
+    z-index: 0; }
+  .canvas .cells {
+    line-height: 0;
+    border: 1px solid #4f515b;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 672px;
+    height: 480px; }
+  .canvas .cell {
+    width: 48px;
+    height: 48px;
+    border: 1px dashed #4f515b;
+    display: inline-block;
+    box-sizing: border-box; }
+
+/*# sourceMappingURL=main.css.map */
