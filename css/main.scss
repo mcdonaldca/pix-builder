@@ -1,3 +1,5 @@
+$MULT: 3;
+
 $grey-700: #4f515b;
 $grey-500: #737685;
 $grey-300: #acb0c5;
@@ -212,8 +214,38 @@ html, body {
   }
 
   .cell {
+    display: inline-block;
     width: 48px;
     height: 48px;
-    display: inline-block;
+  }
+
+  .edges {
+    display: none;
+    left: 0;
+    position: absolute;
+    top: 0;
+    z-index: 2;
+  }
+
+  .edge {
+    cursor: pointer;
+    height: 6px * $MULT;
+    position: absolute;
+    width: 6px * $MULT;
+
+    &.vertical {
+      height: 8px * $MULT;
+      width: 4px * $MULT;
+    }
+
+    &.horizontal {
+      height: 4px * $MULT;
+      width: 8px * $MULT;
+    }
+
+    &:hover {
+      background-color: $grey-500;
+      opacity: .75;
+    }
   }
 }

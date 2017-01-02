@@ -9,6 +9,7 @@ function Builder() {
 
   this.buildCanvas();
   this.buildCells();
+  this.buildEdges();
 
   var builder = this;
   $('.cell').mousedown(function(e) {
@@ -52,6 +53,7 @@ function Builder() {
 
 
 
+
 Builder.prototype.buildCanvas = function() {
   var canvasContainer = $('.canvas');
   this.displayCanvas = document.createElement('canvas');
@@ -69,6 +71,7 @@ Builder.prototype.buildCanvas = function() {
 
 
 
+
 Builder.prototype.buildCells = function() {
   var cellsContainer = $('.cells');
   for (var y = 0; y < HEIGHT; y++) {
@@ -76,8 +79,56 @@ Builder.prototype.buildCells = function() {
       var div = document.createElement('div');
       $(div).addClass('cell')
             .attr('data-x', x)
-            .attr('data-y', y);
+            .attr('data-y', y)
       $(cellsContainer).append(div);
+    }
+  }
+};
+
+
+
+
+Builder.prototype.buildEdges = function() {
+  var edgesContainer = $('.edges');
+  for (var y = 0; y < HEIGHT; y++) {
+    for (var x = 0; x < WIDTH; x++) {
+      var edgeTop = document.createElement('div');
+      var edgeRight = document.createElement('div');
+      var edgeBottom = document.createElement('div');
+      var edgeLeft = document.createElement('div');
+
+      $(edgeTop).addClass('edge horizontal')
+                .attr('data-x', x)
+                .attr('data-y', y)
+                .attr('data-edge', 'top')
+                .css('left', ((x * UNIT * MULT) + (4 * MULT)).toString() + 'px')
+                .css('top', (y * UNIT * MULT).toString() + 'px');
+
+      $(edgeRight).addClass('edge vertical')
+                  .attr('data-x', x)
+                  .attr('data-y', y)
+                  .attr('data-edge', 'right')
+                  .css('left', ((x * UNIT * MULT) + (12 * MULT)).toString() + 'px')
+                  .css('top', ((y * UNIT * MULT) + (4 * MULT)).toString() + 'px');
+
+      $(edgeBottom).addClass('edge horizontal')
+                   .attr('data-x', x)
+                    .attr('data-y', y)
+                    .attr('data-edge', 'top')
+                    .css('left', ((x * UNIT * MULT) + (4 * MULT)).toString() + 'px')
+                   .css('top', ((y * UNIT * MULT) + (12 * MULT)).toString() + 'px');
+
+      $(edgeLeft).addClass('edge vertical')
+                 .attr('data-x', x)
+                 .attr('data-y', y)
+                 .attr('data-edge', 'top')
+                 .css('left', (x * UNIT * MULT).toString() + 'px')
+                 .css('top', ((y * UNIT * MULT) + (4 * MULT)).toString() + 'px');
+
+      $(edgesContainer).append(edgeTop);
+      $(edgesContainer).append(edgeRight);
+      $(edgesContainer).append(edgeBottom);
+      $(edgesContainer).append(edgeLeft);
     }
   }
 };
@@ -92,6 +143,11 @@ Builder.prototype.cellAction = function(x, y) {
       else this.clearCell(x, y);
       break;
 
+    case this.Modes.WALLS:
+      if (this.selection != 'hammer') this.addWall(x, y);
+      else this.removeWall(x, y);
+      break;
+
     default:
       break;
   }
@@ -103,9 +159,9 @@ Builder.prototype.cellAction = function(x, y) {
 Builder.prototype.fillCell = function(x, y) {
   // Create a new image, set its onload function, and set the source
   var image = new Image();
-  var pool = this;
+  var builder = this;
   image.onload = function() {
-    pool.drawImageOnLoad(this, x, y);
+    builder.drawImageOnLoad(this, x, y);
   }
   image.src = this.selection;
 };
@@ -116,6 +172,26 @@ Builder.prototype.fillCell = function(x, y) {
 Builder.prototype.clearCell = function(x, y) {
   this.displayContext.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
 };
+
+
+
+
+Builder.prototype.addWall = function(x, y) {
+  // Create a new image, set its onload function, and set the source
+  var image = new Image();
+  var builder = this;
+  image.onload = function() {
+    builder.drawImageOnLoad(this, x, y);
+  }
+  image.src = this.selection.replace('-display', '');
+};
+
+
+
+
+Builder.prototype.removeWall = function(x, y) {
+  console.log('remove wall', x, y);
+}
 
 
 
@@ -185,6 +261,9 @@ Builder.prototype.modeChange = function(type) {
     this.mode = type;
     $('.toolbox .currentMode').removeClass('currentMode');
     $('.toolbox [data-type="' + type + '"]').addClass('currentMode');
+
+    if (this.mode == 'walls') $('.edges').show();
+    else $('.edges').hide();
   }
 }
 
@@ -211,6 +290,7 @@ Builder.prototype.wallsSelection = function(e) {
   $('.panel .selected').removeClass('selected');
 
   if ($(e.delegateTarget).hasClass('hammer')) {
+    console.log('hey')
     this.selection = 'hammer';
   } else {
     var img = e.delegateTarget.firstElementChild;
