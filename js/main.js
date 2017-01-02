@@ -17,17 +17,21 @@ function Builder() {
     var y = $(e.target).attr('data-y');
     builder.cellMouseDown(x, y);
   });
-
-  var builder = this;
-  $('.cell').mouseup(function(e) {
+  $('.canvas').mouseup(function(e) {
     var x = $(e.target).attr('data-x');
     var y = $(e.target).attr('data-y');
-    builder.cellMouseUp(x, y);
+    builder.mouseUp(x, y);
   });
   $('.cell').mouseenter(function(e) {
     var x = $(e.target).attr('data-x');
     var y = $(e.target).attr('data-y');
     builder.cellMouseEnter(x, y);
+  });
+  $('.edge').mousedown(function(e) {
+    var x = $(e.target).attr('data-x');
+    var y = $(e.target).attr('data-y');
+    var edge = $(e.target).attr('data-edge');
+    builder.edgeMouseDown(x, y, edge);
   });
   $('.actions__button').click(function(e) {
     var type = $(e.delegateTarget).attr('data-type');
@@ -47,6 +51,12 @@ function Builder() {
   this.Modes = {
     FLOORING: 'flooring',
     WALLS: 'walls',
+  }
+  this.Edges = {
+    TOP: 'top',
+    RIGHT: 'right',
+    BOTTOM: 'bottom',
+    LEFT: 'left',
   }
   this.mode = this.Modes.FLOORING;
 }
@@ -114,14 +124,14 @@ Builder.prototype.buildEdges = function() {
       $(edgeBottom).addClass('edge horizontal')
                    .attr('data-x', x)
                     .attr('data-y', y)
-                    .attr('data-edge', 'top')
+                    .attr('data-edge', 'bottom')
                     .css('left', ((x * UNIT * MULT) + (4 * MULT)).toString() + 'px')
                    .css('top', ((y * UNIT * MULT) + (12 * MULT)).toString() + 'px');
 
       $(edgeLeft).addClass('edge vertical')
                  .attr('data-x', x)
                  .attr('data-y', y)
-                 .attr('data-edge', 'top')
+                 .attr('data-edge', 'left')
                  .css('left', (x * UNIT * MULT).toString() + 'px')
                  .css('top', ((y * UNIT * MULT) + (4 * MULT)).toString() + 'px');
 
@@ -136,7 +146,9 @@ Builder.prototype.buildEdges = function() {
 
 
 
-Builder.prototype.cellAction = function(x, y) {
+Builder.prototype.cellAction = function(x, y, edge) {
+  edge = edge || this.currentEdge;
+
   switch(this.mode) {
     case this.Modes.FLOORING:
       if (this.selection != 'hammer') this.fillCell(x, y);
@@ -144,10 +156,26 @@ Builder.prototype.cellAction = function(x, y) {
       break;
 
     case this.Modes.WALLS:
-      if (this.selection != 'hammer') this.addWall(x, y);
-      else this.removeWall(x, y);
+    default:
+      break;
+  }
+};
+
+
+
+
+Builder.prototype.edgeAction = function(x, y, edge) {
+  if (this.mouseDown) edge = edge || this.currentEdge;
+
+  switch(this.mode) {
+    case this.Modes.WALLS:
+      if (edge) {
+        if (this.selection != 'hammer') this.addWall(x, y, edge);
+        else this.removeWall(x, y, edge);
+      }
       break;
 
+    case this.Modes.FLOORING:
     default:
       break;
   }
@@ -176,14 +204,29 @@ Builder.prototype.clearCell = function(x, y) {
 
 
 
-Builder.prototype.addWall = function(x, y) {
+Builder.prototype.addWall = function(x, y, edge) {
+  switch(edge) {
+    case this.Edges.TOP:
+    case this.Edges.BOTTOM:
+      y--;
+      break;
+
+    case this.Edges.LEFT:
+    case this.Edges.RIGHT:
+      y = y - 2;
+      break;
+
+    default:
+      break;
+  }
+
   // Create a new image, set its onload function, and set the source
   var image = new Image();
   var builder = this;
   image.onload = function() {
     builder.drawImageOnLoad(this, x, y);
   }
-  image.src = this.selection.replace('-display', '');
+  image.src = this.selection.replace('display', edge);
 };
 
 
@@ -204,15 +247,27 @@ Builder.prototype.cellMouseDown = function(x, y) {
 
 
 
-Builder.prototype.cellMouseUp = function(x, y) {
-  this.mouseDown = false;
+Builder.prototype.edgeMouseDown = function(x, y, edge) {
+  this.mouseDown = true;
+  this.currentEdge = edge;
+  this.edgeAction(x, y, edge);
 };
 
 
 
 
 Builder.prototype.cellMouseEnter = function(x, y) {
-  if (this.mouseDown) this.cellAction(x, y);
+  if (this.mouseDown) {
+    if (this.mode == this.Modes.WALLS) this.edgeAction(x, y);
+    else this.cellAction(x, y);
+  } 
+};
+
+
+
+
+Builder.prototype.mouseUp = function(x, y) {
+  this.mouseDown = false;
 };
 
 
@@ -290,7 +345,6 @@ Builder.prototype.wallsSelection = function(e) {
   $('.panel .selected').removeClass('selected');
 
   if ($(e.delegateTarget).hasClass('hammer')) {
-    console.log('hey')
     this.selection = 'hammer';
   } else {
     var img = e.delegateTarget.firstElementChild;
