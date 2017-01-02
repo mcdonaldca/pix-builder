@@ -198,11 +198,13 @@ html, body {
   }
 
   canvas {
-    position: relative;
+    position: absolute;
     z-index: 0;
 
     &.hide { display: none; }
   }
+
+
 
   .cells {
     cursor: pointer;

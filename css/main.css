@@ -152,7 +152,7 @@ html, body {
   .canvas.gridded .cells .cell {
     border: 1px dashed #dfe2ef; }
   .canvas canvas {
-    position: relative;
+    position: absolute;
     z-index: 0; }
     .canvas canvas.hide {
       display: none; }

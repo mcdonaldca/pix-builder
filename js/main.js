@@ -7,7 +7,7 @@ function Builder() {
   this.width = WIDTH * UNIT * MULT;
   this.height = HEIGHT * UNIT * MULT;
 
-  this.buildCanvas();
+  this.buildCanvases();
   this.buildCells();
   this.buildEdges();
 
@@ -64,18 +64,24 @@ function Builder() {
 
 
 
-Builder.prototype.buildCanvas = function() {
-  var canvasContainer = $('.canvas');
-  this.displayCanvas = document.createElement('canvas');
-  this.displayContext = this.displayCanvas.getContext('2d'); // Context of the canvas.
-  this.displayCanvas.width = this.width;
-  this.displayCanvas.height = this.height;
+Builder.prototype.buildCanvases = function() {
+  this.flooringCanvas = document.createElement('canvas');
+  this.flooringContext = this.flooringCanvas.getContext('2d'); // Context of the canvas.
+  this.flooringCanvas.width = this.width;
+  this.flooringCanvas.height = this.height;
+
+  this.wallsCanvas = document.createElement('canvas');
+  this.wallsContext = this.wallsCanvas.getContext('2d'); // Context of the canvas.
+  this.wallsCanvas.width = this.width;
+  this.wallsCanvas.height = this.height;
 
   this.manipCanvas = document.createElement('canvas');
   $(this.manipCanvas).addClass('hide');
   this.manipContext = this.manipCanvas.getContext('2d'); // Context of the canvas.
 
-  $(canvasContainer).append(this.displayCanvas);
+  var canvasContainer = $('.canvas');
+  $(canvasContainer).append(this.flooringCanvas);
+  $(canvasContainer).append(this.wallsCanvas);
   $(canvasContainer).append(this.manipCanvas);
 };
 
@@ -189,7 +195,7 @@ Builder.prototype.fillCell = function(x, y) {
   var image = new Image();
   var builder = this;
   image.onload = function() {
-    builder.drawImageOnLoad(this, x, y);
+    builder.drawImageOnLoad(this, x, y, builder.flooringContext);
   }
   image.src = this.selection;
 };
@@ -198,7 +204,7 @@ Builder.prototype.fillCell = function(x, y) {
 
 
 Builder.prototype.clearCell = function(x, y) {
-  this.displayContext.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
+  this.flooringCanvas.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
 };
 
 
@@ -211,11 +217,6 @@ Builder.prototype.addWall = function(x, y, edge) {
       y--;
       break;
 
-    case this.Edges.LEFT:
-    case this.Edges.RIGHT:
-      y = y - 2;
-      break;
-
     default:
       break;
   }
@@ -224,7 +225,7 @@ Builder.prototype.addWall = function(x, y, edge) {
   var image = new Image();
   var builder = this;
   image.onload = function() {
-    builder.drawImageOnLoad(this, x, y);
+    builder.drawImageOnLoad(this, x, y, builder.wallsContext);
   }
   image.src = this.selection.replace('display', edge);
 };
@@ -281,7 +282,10 @@ Builder.prototype.actionButtonClick = function(type) {
 
     case 'clear-all':
       var shouldClear = confirm('Do you want to clear the canvas?');
-      if (shouldClear) this.displayContext.clearRect(0, 0, this.displayCanvas.width, this.displayCanvas.height);
+      if (shouldClear) {
+        this.flooringContext.clearRect(0, 0, this.width, this.height);
+        this.wallsContext.clearRect(0, 0, this.width, this.height);
+      }
       break;
 
     case 'resize':
@@ -357,7 +361,7 @@ Builder.prototype.wallsSelection = function(e) {
 
 
 // Called when the image to draw has been loaded.
-Builder.prototype.drawImageOnLoad = function(image, x, y) {
+Builder.prototype.drawImageOnLoad = function(image, x, y, context) {
   // Set the manipulation canvas to the image height and width
   // This canvas will always be the size of the original image
   this.manipCanvas.width = image.width * MULT;
@@ -370,8 +374,8 @@ Builder.prototype.drawImageOnLoad = function(image, x, y) {
   this.manipContext.drawImage(image, 0, 0);
 
   // Scale the display canvas & draw the manipulation canvas content
-  this.displayContext.imageSmoothingEnabled = false;
-  this.displayContext.drawImage(this.manipCanvas, x * UNIT * MULT, y * UNIT * MULT);
+  context.imageSmoothingEnabled = false;
+  context.drawImage(this.manipCanvas, x * UNIT * MULT, y * UNIT * MULT);
 };
 
 
