@@ -72,12 +72,12 @@ html, body {
 .toolbar {
   position: relative;
   top: 2px;
+  z-index: 1;
 
   .toolbar__actions { 
     background-color: $grey-500;
     padding: 8px;
     width: 100%;
-    z-index: 1;
     @include center-vertical; 
   }
 
@@ -86,7 +86,15 @@ html, body {
   }
 
   .toolbar__panels {
+    .panels__panel {
+      background-color: $grey-300;
+      border-bottom-right-radius: 4px;
+      display: inline-block;
 
+      &.expanded {
+        padding-top: 50px;
+      }
+    }
   }
 }
 
@@ -104,9 +112,7 @@ html, body {
   width: 252px;
   transition: all .35s ease-in-out;
 
-  &.expanded {
-    right: 0;
-  }
+  &.expanded { right: 0; }
 
   .toolbox__actions {
     background-color: $grey-300;

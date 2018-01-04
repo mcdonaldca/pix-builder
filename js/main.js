@@ -259,7 +259,7 @@ Builder.prototype.actionButtonClick = function(type) {
       break;
 
     case 'resize':
-      console.log('resize');
+      $('.panels__panel.resize').toggleClass('expanded');
       break;
 
     default:
