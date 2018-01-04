@@ -1,4 +1,4 @@
-function Builder() {
+function WorldBuilder() {
   this.width = WIDTH * UNIT * MULT;
   this.height = HEIGHT * UNIT * MULT;
 
@@ -16,7 +16,7 @@ function Builder() {
 
 
 
-Builder.prototype.buildCanvases = function() {
+WorldBuilder.prototype.buildCanvases = function() {
   this.flooringCanvas = document.createElement('canvas');
   this.flooringContext = this.flooringCanvas.getContext('2d'); // Context of the canvas.
   this.flooringCanvas.width = this.width;
@@ -39,7 +39,7 @@ Builder.prototype.buildCanvases = function() {
 
 
 
-Builder.prototype.buildCells = function() {
+WorldBuilder.prototype.buildCells = function() {
   var cellsContainer = $('.cells');
   for (var y = 0; y < HEIGHT; y++) {
     for (var x = 0; x < WIDTH; x++) {
@@ -54,7 +54,7 @@ Builder.prototype.buildCells = function() {
 
 
 
-Builder.prototype.buildEdges = function() {
+WorldBuilder.prototype.buildEdges = function() {
   var edgesContainer = $('.edges');
   for (var y = 0; y < HEIGHT; y++) {
     for (var x = 0; x < WIDTH; x++) {
@@ -101,7 +101,7 @@ Builder.prototype.buildEdges = function() {
 
 
 
-Builder.prototype.setUpClickEvents = function() {
+WorldBuilder.prototype.setUpClickEvents = function() {
   var builder = this;
   $('.cell').mousedown(function(e) {
     var x = $(e.target).attr('data-x');
@@ -138,7 +138,7 @@ Builder.prototype.setUpClickEvents = function() {
 
 
 
-Builder.prototype.cellAction = function(x, y, edge) {
+WorldBuilder.prototype.cellAction = function(x, y, edge) {
   edge = edge || this.currentEdge;
 
   switch(this.mode) {
@@ -159,7 +159,7 @@ Builder.prototype.cellAction = function(x, y, edge) {
 
 
 
-Builder.prototype.edgeAction = function(x, y, edge) {
+WorldBuilder.prototype.edgeAction = function(x, y, edge) {
   if (this.mouseDown) edge = edge || this.currentEdge;
 
   switch(this.mode) {
@@ -178,7 +178,7 @@ Builder.prototype.edgeAction = function(x, y, edge) {
 
 
 
-Builder.prototype.addFlooring = function(x, y) {
+WorldBuilder.prototype.addFlooring = function(x, y) {
   // Create a new image, set its onload function, and set the source
   var image = new Image();
   var builder = this;
@@ -192,35 +192,35 @@ Builder.prototype.addFlooring = function(x, y) {
 
 
 
-Builder.prototype.removeFlooring = function(x, y) {
+WorldBuilder.prototype.removeFlooring = function(x, y) {
   this.flooringContext.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
   this.world.removeFlooring(x, y)
 };
 
 
 
-Builder.prototype.addWall = function(x, y, edge) {
+WorldBuilder.prototype.addWall = function(x, y, edge) {
   var walls = this.world.addWall(x, y, this.selection, edge);
   this.drawWalls(edge, x, y);
 };
 
 
 
-Builder.prototype.removeWall = function(x, y, edge) {
+WorldBuilder.prototype.removeWall = function(x, y, edge) {
   var walls = this.world.removeWall(x, y, edge);
   this.drawWalls(walls, x, y);
 }
 
 
 
-Builder.prototype.cellMouseDown = function(x, y) {
+WorldBuilder.prototype.cellMouseDown = function(x, y) {
   this.mouseDown = true;
   this.cellAction(x, y);
 };
 
 
 
-Builder.prototype.edgeMouseDown = function(x, y, edge) {
+WorldBuilder.prototype.edgeMouseDown = function(x, y, edge) {
   this.mouseDown = true;
   this.currentEdge = edge;
   this.edgeAction(x, y, edge);
@@ -228,7 +228,7 @@ Builder.prototype.edgeMouseDown = function(x, y, edge) {
 
 
 
-Builder.prototype.cellMouseEnter = function(x, y) {
+WorldBuilder.prototype.cellMouseEnter = function(x, y) {
   if (this.mouseDown) {
     if (this.mode == Modes.WALLS) this.edgeAction(x, y);
     else this.cellAction(x, y);
@@ -237,13 +237,13 @@ Builder.prototype.cellMouseEnter = function(x, y) {
 
 
 
-Builder.prototype.mouseUp = function(x, y) {
+WorldBuilder.prototype.mouseUp = function(x, y) {
   this.mouseDown = false;
 };
 
 
 
-Builder.prototype.actionButtonClick = function(type) {
+WorldBuilder.prototype.actionButtonClick = function(type) {
   switch(type) {
     case 'toggle-grid':
       $('.canvas').toggleClass('gridded');
@@ -268,7 +268,7 @@ Builder.prototype.actionButtonClick = function(type) {
 
 
 
-Builder.prototype.toolboxActionButtonClick = function(type) {
+WorldBuilder.prototype.toolboxActionButtonClick = function(type) {
   if (this.openPanel == type) {
     $('.toolbox').removeClass('expanded');
     this.openPanel = undefined;
@@ -285,7 +285,7 @@ Builder.prototype.toolboxActionButtonClick = function(type) {
 
 
 
-Builder.prototype.changeMode = function(type) {
+WorldBuilder.prototype.changeMode = function(type) {
   if (this.mode != type) {
     this.mode = type;
     $('.toolbox .currentMode').removeClass('currentMode');
@@ -303,7 +303,7 @@ Builder.prototype.changeMode = function(type) {
 
 
 
-Builder.prototype.flooringSelection = function(e) {
+WorldBuilder.prototype.flooringSelection = function(e) {
   this.changeMode(Modes.FLOORING);
   $('.panel .selected').removeClass('selected');
 
@@ -319,7 +319,7 @@ Builder.prototype.flooringSelection = function(e) {
 
 
 
-Builder.prototype.wallsSelection = function(e) {
+WorldBuilder.prototype.wallsSelection = function(e) {
   this.changeMode(Modes.WALLS);
   $('.panel .selected').removeClass('selected');
 
@@ -335,7 +335,7 @@ Builder.prototype.wallsSelection = function(e) {
 
 
 
-Builder.prototype.drawWalls = function(edge, x, y) {
+WorldBuilder.prototype.drawWalls = function(edge, x, y) {
   // Create a new image, set its onload function, and set the source
   var image = new Image();
   var builder = this;
@@ -351,7 +351,7 @@ Builder.prototype.drawWalls = function(edge, x, y) {
 
 
 // Called when the image to draw has been loaded.
-Builder.prototype.drawImageOnLoad = function(image, x, y, context) {
+WorldBuilder.prototype.drawImageOnLoad = function(image, x, y, context) {
   // Set the manipulation canvas to the image height and width
   // This canvas will always be the size of the original image
   this.manipCanvas.width = image.width * MULT;
@@ -373,5 +373,5 @@ Builder.prototype.drawImageOnLoad = function(image, x, y, context) {
 // Start application when window loads.   
 window.onload = function() {
   // Declaerd globally for debugging purposes
-  builder = new Builder();
+  builder = new WorldBuilder();
 }
