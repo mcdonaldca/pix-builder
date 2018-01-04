@@ -193,8 +193,7 @@ Builder.prototype.addFlooring = function(x, y) {
 
 
 Builder.prototype.removeFlooring = function(x, y) {
-  this.flooringCanvas.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
-
+  this.flooringContext.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
   this.world.removeFlooring(x, y)
 };
 
