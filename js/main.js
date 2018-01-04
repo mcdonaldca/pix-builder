@@ -1,8 +1,3 @@
-var WIDTH = 14;
-var HEIGHT = 10;
-var UNIT = 16;
-var MULT = 3;
-
 function Builder() {
   this.width = WIDTH * UNIT * MULT;
   this.height = HEIGHT * UNIT * MULT;
@@ -10,57 +5,14 @@ function Builder() {
   this.buildCanvases();
   this.buildCells();
   this.buildEdges();
+  this.setUpClickEvents();
+  this.world = new World();
 
-  var builder = this;
-  $('.cell').mousedown(function(e) {
-    var x = $(e.target).attr('data-x');
-    var y = $(e.target).attr('data-y');
-    builder.cellMouseDown(x, y);
-  });
-  $('.canvas').mouseup(function(e) {
-    var x = $(e.target).attr('data-x');
-    var y = $(e.target).attr('data-y');
-    builder.mouseUp(x, y);
-  });
-  $('.cell').mouseenter(function(e) {
-    var x = $(e.target).attr('data-x');
-    var y = $(e.target).attr('data-y');
-    builder.cellMouseEnter(x, y);
-  });
-  $('.edge').mousedown(function(e) {
-    var x = $(e.target).attr('data-x');
-    var y = $(e.target).attr('data-y');
-    var edge = $(e.target).attr('data-edge');
-    builder.edgeMouseDown(x, y, edge);
-  });
-  $('.actions__button').click(function(e) {
-    var type = $(e.delegateTarget).attr('data-type');
-    builder.actionButtonClick(type);
-  });
-  $('.toolbox .actions__button').click(function(e) {
-    var type = $(e.delegateTarget).attr('data-type');
-    builder.toolboxActionButtonClick(type);
-  });
-  $('.panel__flooring .selection__option').click(function(e) { builder.flooringSelection(e); });
-  $('.panel__walls .selection__option').click(function(e) { builder.wallsSelection(e); });
-
+  this.mode = Modes.FLOORING;
   this.mouseDown = false;
   this.openPanel = undefined;
   this.selection = 'img/flooring/wood-light.png';
-
-  this.Modes = {
-    FLOORING: 'flooring',
-    WALLS: 'walls',
-  }
-  this.Edges = {
-    TOP: 'top',
-    RIGHT: 'right',
-    BOTTOM: 'bottom',
-    LEFT: 'left',
-  }
-  this.mode = this.Modes.FLOORING;
 }
-
 
 
 
@@ -87,7 +39,6 @@ Builder.prototype.buildCanvases = function() {
 
 
 
-
 Builder.prototype.buildCells = function() {
   var cellsContainer = $('.cells');
   for (var y = 0; y < HEIGHT; y++) {
@@ -100,7 +51,6 @@ Builder.prototype.buildCells = function() {
     }
   }
 };
-
 
 
 
@@ -151,22 +101,61 @@ Builder.prototype.buildEdges = function() {
 
 
 
+Builder.prototype.setUpClickEvents = function() {
+  var builder = this;
+  $('.cell').mousedown(function(e) {
+    var x = $(e.target).attr('data-x');
+    var y = $(e.target).attr('data-y');
+    builder.cellMouseDown(x, y);
+  });
+  $('.canvas').mouseup(function(e) {
+    var x = $(e.target).attr('data-x');
+    var y = $(e.target).attr('data-y');
+    builder.mouseUp(x, y);
+  });
+  $('.cell').mouseenter(function(e) {
+    var x = $(e.target).attr('data-x');
+    var y = $(e.target).attr('data-y');
+    builder.cellMouseEnter(x, y);
+  });
+  $('.edge').mousedown(function(e) {
+    var x = $(e.target).attr('data-x');
+    var y = $(e.target).attr('data-y');
+    var edge = $(e.target).attr('data-edge');
+    builder.edgeMouseDown(x, y, edge);
+  });
+  $('.actions__button').click(function(e) {
+    var type = $(e.delegateTarget).attr('data-type');
+    builder.actionButtonClick(type);
+  });
+  $('.toolbox .actions__button').click(function(e) {
+    var type = $(e.delegateTarget).attr('data-type');
+    builder.toolboxActionButtonClick(type);
+  });
+  $('.panel__flooring .selection__option').click(function(e) { builder.flooringSelection(e); });
+  $('.panel__walls .selection__option').click(function(e) { builder.wallsSelection(e); });
+};
+
+
 
 Builder.prototype.cellAction = function(x, y, edge) {
   edge = edge || this.currentEdge;
 
   switch(this.mode) {
-    case this.Modes.FLOORING:
-      if (this.selection != 'hammer') this.fillCell(x, y);
-      else this.clearCell(x, y);
+    case Modes.FLOORING:
+      if (this.selection != 'hammer') this.addFlooring(x, y);
+      else this.removeFlooring(x, y);
       break;
 
-    case this.Modes.WALLS:
+    case Modes.WALLS:
+      if (this.selection != 'hammer') this.addWall(x, y, Edges.CENTER);
+      else this.removeWall(x, y, Edges.CENTER);
+      break;
+
     default:
       break;
   }
 };
-
 
 
 
@@ -174,14 +163,14 @@ Builder.prototype.edgeAction = function(x, y, edge) {
   if (this.mouseDown) edge = edge || this.currentEdge;
 
   switch(this.mode) {
-    case this.Modes.WALLS:
+    case Modes.WALLS:
       if (edge) {
         if (this.selection != 'hammer') this.addWall(x, y, edge);
         else this.removeWall(x, y, edge);
       }
       break;
 
-    case this.Modes.FLOORING:
+    case Modes.FLOORING:
     default:
       break;
   }
@@ -189,8 +178,7 @@ Builder.prototype.edgeAction = function(x, y, edge) {
 
 
 
-
-Builder.prototype.fillCell = function(x, y) {
+Builder.prototype.addFlooring = function(x, y) {
   // Create a new image, set its onload function, and set the source
   var image = new Image();
   var builder = this;
@@ -198,45 +186,31 @@ Builder.prototype.fillCell = function(x, y) {
     builder.drawImageOnLoad(this, x, y, builder.flooringContext);
   }
   image.src = this.selection;
+
+  this.world.addFlooring(x, y, this.selection)
 };
 
 
 
-
-Builder.prototype.clearCell = function(x, y) {
+Builder.prototype.removeFlooring = function(x, y) {
   this.flooringCanvas.clearRect(x * UNIT * MULT, y * UNIT * MULT, UNIT * MULT, UNIT * MULT);
-};
 
+  this.world.removeFlooring(x, y)
+};
 
 
 
 Builder.prototype.addWall = function(x, y, edge) {
-  switch(edge) {
-    case this.Edges.TOP:
-    case this.Edges.BOTTOM:
-      y--;
-      break;
-
-    default:
-      break;
-  }
-
-  // Create a new image, set its onload function, and set the source
-  var image = new Image();
-  var builder = this;
-  image.onload = function() {
-    builder.drawImageOnLoad(this, x, y, builder.wallsContext);
-  }
-  image.src = this.selection.replace('display', edge);
+  var walls = this.world.addWall(x, y, this.selection, edge);
+  this.drawWalls(edge, x, y);
 };
 
 
 
-
-Builder.prototype.removeWall = function(x, y) {
-  console.log('remove wall', x, y);
+Builder.prototype.removeWall = function(x, y, edge) {
+  var walls = this.world.removeWall(x, y, edge);
+  this.drawWalls(walls, x, y);
 }
-
 
 
 
@@ -244,7 +218,6 @@ Builder.prototype.cellMouseDown = function(x, y) {
   this.mouseDown = true;
   this.cellAction(x, y);
 };
-
 
 
 
@@ -256,21 +229,18 @@ Builder.prototype.edgeMouseDown = function(x, y, edge) {
 
 
 
-
 Builder.prototype.cellMouseEnter = function(x, y) {
   if (this.mouseDown) {
-    if (this.mode == this.Modes.WALLS) this.edgeAction(x, y);
+    if (this.mode == Modes.WALLS) this.edgeAction(x, y);
     else this.cellAction(x, y);
   } 
 };
 
 
 
-
 Builder.prototype.mouseUp = function(x, y) {
   this.mouseDown = false;
 };
-
 
 
 
@@ -298,6 +268,7 @@ Builder.prototype.actionButtonClick = function(type) {
 };
 
 
+
 Builder.prototype.toolboxActionButtonClick = function(type) {
   if (this.openPanel == type) {
     $('.toolbox').removeClass('expanded');
@@ -315,21 +286,26 @@ Builder.prototype.toolboxActionButtonClick = function(type) {
 
 
 
-Builder.prototype.modeChange = function(type) {
+Builder.prototype.changeMode = function(type) {
   if (this.mode != type) {
     this.mode = type;
     $('.toolbox .currentMode').removeClass('currentMode');
     $('.toolbox [data-type="' + type + '"]').addClass('currentMode');
 
-    if (this.mode == 'walls') $('.edges').show();
-    else $('.edges').hide();
+    if (this.mode == 'walls') {
+      $('.edges').show();
+      $('.edge.horizontal').hide();
+    } else {
+      $('.edge').show();
+      $('.edges').hide();
+    }
   }
 }
 
 
 
 Builder.prototype.flooringSelection = function(e) {
-  this.modeChange(this.Modes.FLOORING);
+  this.changeMode(Modes.FLOORING);
   $('.panel .selected').removeClass('selected');
 
   if ($(e.delegateTarget).hasClass('hammer')) {
@@ -345,7 +321,7 @@ Builder.prototype.flooringSelection = function(e) {
 
 
 Builder.prototype.wallsSelection = function(e) {
-  this.modeChange(this.Modes.WALLS);
+  this.changeMode(Modes.WALLS);
   $('.panel .selected').removeClass('selected');
 
   if ($(e.delegateTarget).hasClass('hammer')) {
@@ -356,6 +332,21 @@ Builder.prototype.wallsSelection = function(e) {
   }
 
   $(e.delegateTarget).addClass('selected');
+};
+
+
+
+Builder.prototype.drawWalls = function(edge, x, y) {
+  // Create a new image, set its onload function, and set the source
+  var image = new Image();
+  var builder = this;
+  image.onload = function() {
+    if (edge == Edges.CENTER) 
+      builder.drawImageOnLoad(this, x, y - 1, builder.wallsContext);
+    else
+      builder.drawImageOnLoad(this, x, y, builder.wallsContext);
+  }
+  image.src = this.selection.replace('display', edge);
 };
 
 
