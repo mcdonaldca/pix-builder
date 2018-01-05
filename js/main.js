@@ -75,17 +75,8 @@ WorldBuilder.prototype.buildEdges = function() {
   var edgesContainer = $('.edges');
   for (var y = 0; y < INIT_HEIGHT; y++) {
     for (var x = 0; x < INIT_WIDTH; x++) {
-      var edgeTop = document.createElement('div');
       var edgeRight = document.createElement('div');
-      var edgeBottom = document.createElement('div');
       var edgeLeft = document.createElement('div');
-
-      $(edgeTop).addClass('edge horizontal')
-                .attr('data-x', x)
-                .attr('data-y', y)
-                .attr('data-edge', 'top')
-                .css('left', ((x * UNIT * MULT) + (4 * MULT)).toString() + 'px')
-                .css('top', (y * UNIT * MULT).toString() + 'px');
 
       $(edgeRight).addClass('edge vertical')
                   .attr('data-x', x)
@@ -94,13 +85,6 @@ WorldBuilder.prototype.buildEdges = function() {
                   .css('left', ((x * UNIT * MULT) + (12 * MULT)).toString() + 'px')
                   .css('top', ((y * UNIT * MULT) + (4 * MULT)).toString() + 'px');
 
-      $(edgeBottom).addClass('edge horizontal')
-                   .attr('data-x', x)
-                    .attr('data-y', y)
-                    .attr('data-edge', 'bottom')
-                    .css('left', ((x * UNIT * MULT) + (4 * MULT)).toString() + 'px')
-                   .css('top', ((y * UNIT * MULT) + (12 * MULT)).toString() + 'px');
-
       $(edgeLeft).addClass('edge vertical')
                  .attr('data-x', x)
                  .attr('data-y', y)
@@ -108,9 +92,7 @@ WorldBuilder.prototype.buildEdges = function() {
                  .css('left', (x * UNIT * MULT).toString() + 'px')
                  .css('top', ((y * UNIT * MULT) + (4 * MULT)).toString() + 'px');
 
-      $(edgesContainer).append(edgeTop);
       $(edgesContainer).append(edgeRight);
-      $(edgesContainer).append(edgeBottom);
       $(edgesContainer).append(edgeLeft);
     }
   }
@@ -330,12 +312,7 @@ WorldBuilder.prototype.changeMode = function(type) {
     $('.toolbox .currentMode').removeClass('currentMode');
     $('.toolbox [data-type="' + type + '"]').addClass('currentMode');
 
-    if (this.mode == 'walls') {
-      $('.edges').show();
-      $('.edge.horizontal').hide();
-    } else {
-      $('.edges').hide();
-    }
+    this.mode == 'walls' ? $('.edges').show() : $('.edges').hide();
   }
 }
 

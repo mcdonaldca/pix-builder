@@ -11,9 +11,7 @@ var Modes = {
 
 /** The kinds of cell edges */
 var Edges = {
-  TOP: 'top',
   RIGHT: 'right',
-  BOTTOM: 'bottom',
   LEFT: 'left',
   CENTER: 'center',
 }
