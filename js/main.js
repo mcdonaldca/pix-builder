@@ -1,13 +1,19 @@
+/** 
+  The world builder object controls the communication between the various 
+  tools/actions and the world's canvas,
+**/
 function WorldBuilder() {
-  this.width = WIDTH * UNIT * MULT;
-  this.height = HEIGHT * UNIT * MULT;
+  this.width = INIT_WIDTH * UNIT * MULT;
+  this.height = INIT_HEIGHT * UNIT * MULT;
 
+  // Initialize the various parts of the editor.
   this.buildCanvases();
   this.buildCells();
   this.buildEdges();
-  this.setUpClickEvents();
+  this.setUpEvents();
   this.world = new World();
 
+  // Set the defaults for the editor.
   this.mode = Modes.FLOORING;
   this.mouseDown = false;
   this.openPanel = undefined;
@@ -16,21 +22,30 @@ function WorldBuilder() {
 
 
 
+/**
+  Sets up three canvases: flooring, walls, and manipulation canvas.
+  TODO: add canvas for wall shadows
+**/
 WorldBuilder.prototype.buildCanvases = function() {
+  // Set up the flooring canvas + context
   this.flooringCanvas = document.createElement('canvas');
   this.flooringContext = this.flooringCanvas.getContext('2d'); // Context of the canvas.
   this.flooringCanvas.width = this.width;
   this.flooringCanvas.height = this.height;
 
+  // Set up the wall canvas + context
   this.wallsCanvas = document.createElement('canvas');
   this.wallsContext = this.wallsCanvas.getContext('2d'); // Context of the canvas.
   this.wallsCanvas.width = this.width;
   this.wallsCanvas.height = this.height;
 
+  // Set up the manipulation canvas, used to edit and scale before drawing
+  // to one of the other canvases.
   this.manipCanvas = document.createElement('canvas');
   $(this.manipCanvas).addClass('hide');
   this.manipContext = this.manipCanvas.getContext('2d'); // Context of the canvas.
 
+  // Add all the canvases to the html container.
   var canvasContainer = $('.canvas');
   $(canvasContainer).append(this.flooringCanvas);
   $(canvasContainer).append(this.wallsCanvas);
@@ -39,10 +54,11 @@ WorldBuilder.prototype.buildCanvases = function() {
 
 
 
+/** Create all the HTML for the cells of the world. */
 WorldBuilder.prototype.buildCells = function() {
   var cellsContainer = $('.cells');
-  for (var y = 0; y < HEIGHT; y++) {
-    for (var x = 0; x < WIDTH; x++) {
+  for (var y = 0; y < INIT_HEIGHT; y++) {
+    for (var x = 0; x < INIT_WIDTH; x++) {
       var div = document.createElement('div');
       $(div).addClass('cell')
             .attr('data-x', x)
@@ -54,10 +70,11 @@ WorldBuilder.prototype.buildCells = function() {
 
 
 
+/** Create all the HTML for the edges of the cells. **/
 WorldBuilder.prototype.buildEdges = function() {
   var edgesContainer = $('.edges');
-  for (var y = 0; y < HEIGHT; y++) {
-    for (var x = 0; x < WIDTH; x++) {
+  for (var y = 0; y < INIT_HEIGHT; y++) {
+    for (var x = 0; x < INIT_WIDTH; x++) {
       var edgeTop = document.createElement('div');
       var edgeRight = document.createElement('div');
       var edgeBottom = document.createElement('div');
@@ -101,8 +118,12 @@ WorldBuilder.prototype.buildEdges = function() {
 
 
 
-WorldBuilder.prototype.setUpClickEvents = function() {
+/**
+ * Set up the js events that run the show.
+ */
+WorldBuilder.prototype.setUpEvents = function() {
   var builder = this;
+  // Mouse events for the cells + canvas.
   $('.cell').mousedown(function(e) {
     var x = $(e.target).attr('data-x');
     var y = $(e.target).attr('data-y');
@@ -124,6 +145,8 @@ WorldBuilder.prototype.setUpClickEvents = function() {
     var edge = $(e.target).attr('data-edge');
     builder.edgeMouseDown(x, y, edge);
   });
+
+  // Events for action buttons.
   $('.actions__button').click(function(e) {
     var type = $(e.delegateTarget).attr('data-type');
     builder.actionButtonClick(type);
@@ -132,6 +155,8 @@ WorldBuilder.prototype.setUpClickEvents = function() {
     var type = $(e.delegateTarget).attr('data-type');
     builder.toolboxActionButtonClick(type);
   });
+
+  // Events for creation selections.
   $('.panel__flooring .selection__option').click(function(e) { builder.flooringSelection(e); });
   $('.panel__walls .selection__option').click(function(e) { builder.wallsSelection(e); });
 };
@@ -268,23 +293,37 @@ WorldBuilder.prototype.actionButtonClick = function(type) {
 
 
 
+/**
+  Handles a click on one of the toolbox action buttons.
+  
+  @param type The type of button clicked on.
+**/
 WorldBuilder.prototype.toolboxActionButtonClick = function(type) {
+  // If the panel is already open, close it.
   if (this.openPanel == type) {
     $('.toolbox').removeClass('expanded');
     this.openPanel = undefined;
+  // If there is no panel open, open it.
   } else if (!this.openPanel) {
     $('.toolbox').addClass('expanded');
     this.openPanel = type;
+  // Otherwise, set the new panel.
   } else {
     this.openPanel = type;
   }
 
+  // Remove open class from old panel + add to new.
   $('.panel.open').removeClass('open');
   $('.panel__' + type).addClass('open');
 }
 
 
 
+/**
+  Changes the toolbox panel mode.
+   
+  @param type The mode type to switch to.
+**/
 WorldBuilder.prototype.changeMode = function(type) {
   if (this.mode != type) {
     this.mode = type;
@@ -295,7 +334,6 @@ WorldBuilder.prototype.changeMode = function(type) {
       $('.edges').show();
       $('.edge.horizontal').hide();
     } else {
-      $('.edge').show();
       $('.edges').hide();
     }
   }
@@ -303,6 +341,11 @@ WorldBuilder.prototype.changeMode = function(type) {
 
 
 
+/**
+  Handles a selection within the floor toolbox panel.
+
+  @param e The selection click event.
+**/
 WorldBuilder.prototype.flooringSelection = function(e) {
   this.changeMode(Modes.FLOORING);
   $('.panel .selected').removeClass('selected');
@@ -319,38 +362,66 @@ WorldBuilder.prototype.flooringSelection = function(e) {
 
 
 
+/**
+  Handles a selection within the wall toolbox panel.
+
+  @param e The selection click event.
+**/
 WorldBuilder.prototype.wallsSelection = function(e) {
+  // Change the mode to be walls.
   this.changeMode(Modes.WALLS);
+  // Remove the selected highlight from whatever was 
+  // previously selected.
   $('.panel .selected').removeClass('selected');
 
+  // If the clicked item is the hammer, we're in hammer mode!
   if ($(e.delegateTarget).hasClass('hammer')) {
     this.selection = 'hammer';
+  // Otherwise, save the image source to use to draw.
   } else {
     var img = e.delegateTarget.firstElementChild;
     this.selection = $(img).attr('src');
   }
 
+  // Add the selected highlight to the selection.
   $(e.delegateTarget).addClass('selected');
 };
 
 
 
+/**
+  Draws a new wall to the wall context.
+
+  @param edge The edge type to draw
+  @param x    The x coordinate
+  @param y    The y coordinate
+**/
 WorldBuilder.prototype.drawWalls = function(edge, x, y) {
   // Create a new image, set its onload function, and set the source
   var image = new Image();
   var builder = this;
   image.onload = function() {
-    if (edge == Edges.CENTER) 
+    if (edge == Edges.CENTER) {
       builder.drawImageOnLoad(this, x, y - 1, builder.wallsContext);
-    else
+    } else {
       builder.drawImageOnLoad(this, x, y, builder.wallsContext);
+    }
   }
+  // To find the kind of wall to draw, replace the "display" part of the
+  // img path with the edge type.
   image.src = this.selection.replace('display', edge);
 };
 
 
 
-// Called when the image to draw has been loaded.
+/**
+  Called when the image to draw has been loaded.
+
+  @param image   The image that's been loaded
+  @param x       The x coordinate
+  @param y       The y coordinate
+  @param context The context to draw the image on
+**/
 WorldBuilder.prototype.drawImageOnLoad = function(image, x, y, context) {
   // Set the manipulation canvas to the image height and width
   // This canvas will always be the size of the original image
@@ -370,7 +441,7 @@ WorldBuilder.prototype.drawImageOnLoad = function(image, x, y, context) {
 
 
 
-// Start application when window loads.   
+/** Start application when window loads. **/ 
 window.onload = function() {
   // Declaerd globally for debugging purposes
   builder = new WorldBuilder();

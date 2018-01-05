@@ -1,9 +1,9 @@
 function World() {
   this.cells = {};
 
-  for (var x = 0; x < WIDTH; x++) {
+  for (var x = 0; x < INIT_WIDTH; x++) {
     this.cells[x] = {};
-    for (var y = 0; y < HEIGHT; y++) {
+    for (var y = 0; y < INIT_HEIGHT; y++) {
       this.cells[x][y] = new Cell(x, y);
     }
   }
